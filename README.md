@@ -1,2 +1,3 @@
-# ysda_proj_outlier_detection
-Here is my project from YSDA course: Generalized-input model for anomaly and outlier detector.
+- `anomaly_detection/` - скрипты для системы детекции аномалий
+- `benchmark/` - скрипты для бенчмарка 
+- Датасеты: https://disk.yandex.ru/d/xVd33nmvuR3NTw - их надо положить в `/benchmark/data`
