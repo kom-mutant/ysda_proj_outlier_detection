@@ -1,11 +1,17 @@
 import argparse
 import json5
 import logging
+import os
+import sys 
 import pandas as pd
+
+# Add the repo root to Python path
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from src.anomaly_detection_benchmark import AnomalyDetectionBenchmark
 from src.dataset import Dataset
-from src.loggers import InlineLogger, UnderdeepLogger, MLflowLogger
+from src.loggers import InlineLogger
+# from src.loggers import UnderdeepLogger, MLflowLogger
 
 from termcolor import colored
 
@@ -123,23 +129,23 @@ def main():
     time_series_metrics = []  # Time series metrics for each config
 
     for dataset_name in datasets:
-        dataset = Dataset(f'data/{dataset_name}/')
+        dataset = Dataset(f'benchmark/data/{dataset_name}/')
         for config_name, configuration in configurations.items():
             if args.logger == 'inline':
                 logger = InlineLogger(backend=None)
-            elif args.logger == 'mlflow':
-                logger = MLflowLogger(
-                    experiment_name=dataset_name.lower().replace('/', '-'),
-                    run_name=config_name,
-                    detector_config=configuration,
-                )
-            else:
-                logger = UnderdeepLogger(
-                    project_code="test-kek",
-                    experiment_code=dataset_name.lower().replace('/', '-'),
-                    run_name=config_name,
-                    detector_config=configuration,
-                )
+            # elif args.logger == 'mlflow':
+            #     logger = MLflowLogger(
+            #         experiment_name=dataset_name.lower().replace('/', '-'),
+            #         run_name=config_name,
+            #         detector_config=configuration,
+            #     )
+            # else:
+            #     logger = UnderdeepLogger(
+            #         project_code="test-kek",
+            #         experiment_code=dataset_name.lower().replace('/', '-'),
+            #         run_name=config_name,
+            #         detector_config=configuration,
+            #     )
             benchmark = AnomalyDetectionBenchmark(
                 detector_configs=configuration,
                 logger=logger,

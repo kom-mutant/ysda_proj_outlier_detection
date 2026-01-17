@@ -4,7 +4,7 @@ from typing import Union, Dict, Optional, Any
 import pandas as pd
 import numpy as np
 
-from . import TimeSeriesWrapper
+from . import TimeSeriesWrapper 
 from ..models import (
     ARDetector,
     ModelResult
@@ -119,8 +119,8 @@ class AnomalyDetectionSystem:
         scores = detection_result.anomaly_scores
 
         anomaly_scores = np.interp(
-            time_series.original_time_series.index.astype(int),
-            processed_ts.time_series_pd.index.astype(int),
+            time_series.original_time_series.index.astype(np.int64),
+            processed_ts.time_series_pd.index.astype(np.int64),
             scores,
         )
         expected_value, expected_bounds = self._interpolate_expected_values(detection_result, time_series, processed_ts)
@@ -163,8 +163,8 @@ class AnomalyDetectionSystem:
             if ev.ndim == 1:
                 ev = ev.astype(float, copy=False)
                 expected_value = np.interp(
-                    time_series.original_time_series.index.astype(int),
-                    processed_ts.time_series_pd.index.astype(int),
+                    time_series.original_time_series.index.astype(np.int64),
+                    processed_ts.time_series_pd.index.astype(np.int64),
                     ev,
                 )
             elif ev.ndim == 2:
@@ -180,8 +180,8 @@ class AnomalyDetectionSystem:
                 expected_bounds = np.column_stack(
                     [
                         np.interp(
-                            time_series.original_time_series.index.astype(int),
-                            processed_ts.time_series_pd.index.astype(int),
+                            time_series.original_time_series.index.astype(np.int64),
+                            processed_ts.time_series_pd.index.astype(np.int64),
                             eb[:, i],
                         )
                         for i in range(2)
