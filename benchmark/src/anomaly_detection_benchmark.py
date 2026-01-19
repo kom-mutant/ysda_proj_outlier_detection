@@ -10,6 +10,11 @@ from anomaly_detection import AnomalyDetectionSystem
 # from anomaly_detection import select_threshold
 from merlion.evaluate.anomaly import TSADMetric
 from merlion.utils import TimeSeries
+
+from tsfm_public.models.tspulse.modeling_tspulse import TSPulseForReconstruction
+from tsfm_public.toolkit.time_series_anomaly_detection_pipeline import TimeSeriesAnomalyDetectionPipeline
+from tsfm_public.toolkit.ad_helpers import AnomalyScoreMethods
+
 from src.metrics import get_auc_pr, get_f1_best, get_pointwise_f1_pa
 from tqdm import tqdm
 
@@ -31,6 +36,31 @@ class ProcessWorkerArgs:
 
 class AnomalyDetectionBenchmark:
     def __init__(self, detector_configs: Dict, logger: Optional[BaseLogger] = None):
+
+        if detector_configs["detection_model_params"]["model_name"] == "TSPulse":
+            model_path = "ibm-granite/granite-timeseries-tspulse-r1"
+            detector_configs["detection_model_params"]["_model"] = TSPulseForReconstruction.from_pretrained(
+                model_path,
+                num_input_channels=1,
+                revision="main",
+                mask_type="user",
+            )
+
+            # Create pipeline with default parameters
+            detector_configs["detection_model_params"]["_pipeline"] = TimeSeriesAnomalyDetectionPipeline(
+                detector_configs["detection_model_params"]["_model"],
+                timestamp_column="timestamp",
+                target_columns=["value"],
+                prediction_mode=[
+                    AnomalyScoreMethods.TIME_RECONSTRUCTION.value,
+                    AnomalyScoreMethods.FREQUENCY_RECONSTRUCTION.value,
+                ],
+                aggregation_length=detector_configs["detection_model_params"].get("aggregation_length", 64),
+                aggr_function=detector_configs["detection_model_params"].get("aggr_function", "max"),
+                smoothing_length=detector_configs["detection_model_params"].get("smoothing_length", 8),
+                least_significant_scale=detector_configs["detection_model_params"].get("least_significant_scale", 0.01),
+                least_significant_score=detector_configs["detection_model_params"].get("least_significant_score", 0.1),
+            )
         self.detector_configs = detector_configs
         self.logger = logger
         self.results = []
