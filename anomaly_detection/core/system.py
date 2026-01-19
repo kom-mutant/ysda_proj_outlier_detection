@@ -7,6 +7,7 @@ import numpy as np
 from . import TimeSeriesWrapper 
 from ..models import (
     ARDetector,
+    TSPulseDetector,
     ModelResult
 )
 
@@ -29,7 +30,8 @@ class AnomalyDetectionSystem:
     """
 
     AVAILABLE_MODELS = {
-        "Autoregressive": ARDetector
+        "Autoregressive": ARDetector,
+        "TSPulse": TSPulseDetector
     }
 
     def __init__(
