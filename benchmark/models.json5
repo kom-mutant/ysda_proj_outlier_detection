@@ -18,7 +18,7 @@
             "moving_average_n_steps": 1
         },
         "detection_model_params": {
-            "threshold": 0.5,
+            "threshold": 0.3,
             "aggregation_length": 64,
             "aggr_function": "max",
             "smoothing_length": 8,
@@ -27,5 +27,20 @@
             "batch_size": 256,
             "model_name": "TSPulse"
         }
-    }
+    },
+    "flowstate": {
+        "transforms_params": {
+            "apply_normalization": false,
+            "apply_moving_average": false,
+            "moving_average_n_steps": 1
+        },
+        "detection_model_params": {
+            "context_length": 512,
+            "prediction_length": 1,
+            "threshold": 3.0,
+            "scale_factor": 1.0,
+            "batch_size": 32,
+            "model_name": "FlowState"
+        }
+    },
 }

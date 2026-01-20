@@ -8,6 +8,7 @@ from . import TimeSeriesWrapper
 from ..models import (
     ARDetector,
     TSPulseDetector,
+    FlowStateDetector,
     ModelResult
 )
 
@@ -31,6 +32,7 @@ class AnomalyDetectionSystem:
 
     AVAILABLE_MODELS = {
         "Autoregressive": ARDetector,
+        "FlowState": FlowStateDetector,
         "TSPulse": TSPulseDetector
     }
 
