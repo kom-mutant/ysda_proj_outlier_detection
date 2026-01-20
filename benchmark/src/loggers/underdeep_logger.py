@@ -14,7 +14,9 @@ from .base_logger import BaseLogger
 
 
 class UnderdeepLogger(BaseLogger):
-    """Quickstart: https://docs.yandex-team.ru/underdeep/experiments/quickstart"""
+    """
+    Quickstart: https://docs.yandex-team.ru/underdeep/experiments/quickstart
+    """
 
     def __init__(
         self,

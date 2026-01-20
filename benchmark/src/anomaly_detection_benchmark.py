@@ -1,4 +1,5 @@
 import os
+import torch
 import warnings
 from dataclasses import dataclass
 from datetime import timedelta
@@ -14,6 +15,8 @@ from merlion.utils import TimeSeries
 from tsfm_public.models.tspulse.modeling_tspulse import TSPulseForReconstruction
 from tsfm_public.toolkit.time_series_anomaly_detection_pipeline import TimeSeriesAnomalyDetectionPipeline
 from tsfm_public.toolkit.ad_helpers import AnomalyScoreMethods
+
+from tsfm_public.models.flowstate.modeling_flowstate import FlowStateForPrediction
 
 from src.metrics import get_auc_pr, get_f1_best, get_pointwise_f1_pa
 from tqdm import tqdm
@@ -61,6 +64,12 @@ class AnomalyDetectionBenchmark:
                 least_significant_scale=detector_configs["detection_model_params"].get("least_significant_scale", 0.01),
                 least_significant_score=detector_configs["detection_model_params"].get("least_significant_score", 0.1),
             )
+        if detector_configs["detection_model_params"]["model_name"] == "FlowState":
+            model_path = "ibm-granite/granite-timeseries-flowstate-r1"
+            detector_configs["detection_model_params"]["_model"] = FlowStateForPrediction.from_pretrained(
+                model_path
+            ).to(torch.device("cuda" if torch.cuda.is_available() else "cpu"))
+        
         self.detector_configs = detector_configs
         self.logger = logger
         self.results = []

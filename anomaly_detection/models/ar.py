@@ -74,7 +74,7 @@ class ARDetector(BaseDetector):
 
         expected = np.concatenate((time_series.values[:order], model_fit.fittedvalues))
         residuals = time_series.values - expected
-        residual_std = self.calculate_std(residuals)
+        residual_std = self.calculate_std(residuals) 
 
         residuals = expected - time_series.values
         z_scores = np.abs(residuals / residual_std)
