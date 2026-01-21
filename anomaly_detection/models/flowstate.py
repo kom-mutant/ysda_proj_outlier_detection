@@ -92,52 +92,45 @@ class FlowStateDetector(BaseDetector):
         if self._check_insufficient_samples(time_series):
             return self._get_fallback_result_univariate(time_series)
 
-        # Get the time series values
-        values = time_series.values
+        # Get the time series values as numpy array
+        values = np.array(time_series.values)
         n_samples = len(values)
 
         context_length = self.params["context_length"]
         prediction_length = self.params["prediction_length"]
-        batch_size = self.params["batch_size"]
-
-        # Pre-compute all contexts using sliding window
-        n_predictions = n_samples - context_length - prediction_length + 1
-        if n_predictions <= 0:
-            return self._get_fallback_result_univariate(time_series)
-
-        # Create all context windows at once using numpy stride tricks
-        contexts = np.lib.stride_tricks.sliding_window_view(values, context_length)
-        contexts = contexts[:n_predictions]  # Take only valid prediction contexts
 
         # Initialize arrays for predictions and residuals
         predictions = np.full(n_samples, np.nan)
         residuals = np.full(n_samples, np.nan)
-        pred_positions = np.arange(context_length, context_length + n_predictions)
 
-        # Process contexts in batches to manage GPU memory
-        for start_idx in range(0, n_predictions, batch_size):
-            end_idx = min(start_idx + batch_size, n_predictions)
-            batch_contexts = contexts[start_idx:end_idx]
+        # Process each prediction position individually (following FlowState notebook pattern)
+        for i in range(context_length, n_samples - prediction_length + 1):
+            # Get context window for this prediction
+            context = values[i - context_length:i]
 
-            # Convert batch to tensor
-            context_tensors = torch.tensor(batch_contexts, dtype=torch.float32).unsqueeze(-1).to(self._device)
+            # Convert to tensor for FlowState
+            context_tensor = torch.tensor(context, dtype=torch.float32).unsqueeze(0).unsqueeze(-1).to(self._device)
 
             with torch.no_grad():
-                forecasts = self._model(
-                    past_values=context_tensors,
+                forecast = self._model(
+                    past_values=context_tensor,
                     prediction_length=prediction_length,
                     batch_first=True,
                     scale_factor=self.params["scale_factor"]
                 )
-                batch_pred_values = forecasts.prediction_outputs[:, 0, 0].cpu().numpy()
 
-            # Store batch predictions
-            batch_positions = pred_positions[start_idx:end_idx]
-            predictions[batch_positions] = batch_pred_values
-            residuals[batch_positions] = values[batch_positions] - batch_pred_values
+                # Get point prediction (scalar)
+                pred_value = forecast.prediction_outputs[0, 0, 0].item()
 
+                # Get actual value (scalar)
+                actual_value = values[i + prediction_length - 1]
+
+                # Store prediction and calculate residual
+                predictions[i + prediction_length - 1] = pred_value
+                residuals[i + prediction_length - 1] = actual_value - pred_value
+                
         # Handle positions where we couldn't make predictions
-        valid_mask = ~np.isnan(predictions)
+        valid_mask = np.isfinite(predictions)
 
         if np.any(valid_mask):
             first_valid_idx = np.where(valid_mask)[0][0]
