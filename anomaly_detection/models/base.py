@@ -20,6 +20,7 @@ class ModelResult(BaseModel):
     is_anomaly: Any
     expected_value: Any = None
     expected_bounds: Any = None
+    used_fallback: bool = False
 
     @field_validator("anomaly_scores", "is_anomaly")
     @classmethod

@@ -210,6 +210,7 @@ class AnomalyDetectionBenchmark:
             #     detection_result.is_anomaly = detection_result.anomaly_scores > threshold
             anomalies["predicted"] = detection_result.is_anomaly
             anomalies["score"] = detection_result.anomaly_scores
+            anomalies["used_fallback"] = detection_result.used_fallback
             return anomalies
 
         if values_df.index[-1] - values_df.index[0] < history_window:
@@ -232,6 +233,7 @@ class AnomalyDetectionBenchmark:
         anomalies = anomalies.iloc[-sum([len(i) for i in predictions_anomaly]) :]
         anomalies["predicted"] = np.concatenate(predictions_anomaly[::-1])
         anomalies["score"] = np.concatenate(predictions_score[::-1])
+        anomalies["used_fallback"] = False # Default for windowed
 
         return anomalies
 
@@ -242,6 +244,7 @@ class AnomalyDetectionBenchmark:
             anomalies["predicted"],
             anomalies["score"],
         )
+        used_fallback = anomalies["used_fallback"].iloc[0] if "used_fallback" in anomalies.columns else False
         ground_truth_ts = TimeSeries.from_pd(anomalies[["ground_truth"]].rename(columns={"ground_truth": "value"}))
         predicted_ts = TimeSeries.from_pd(anomalies[["predicted"]].rename(columns={"predicted": "value"}))
 
@@ -275,6 +278,7 @@ class AnomalyDetectionBenchmark:
             "f1_pointwise_pa_best": get_pointwise_f1_pa(ground_truth.values, predicted.values),
             "auc_pr": get_auc_pr(ground_truth, score),
             "best_threshold": threshold,
+            "used_fallback": used_fallback,
         }
 
     def get_stats(self, as_dict: bool = False) -> pd.DataFrame:

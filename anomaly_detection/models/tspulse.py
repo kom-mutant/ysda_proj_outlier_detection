@@ -23,7 +23,7 @@ class TSPulseDetector(BaseDetector):
         super().__init__(**kwargs)
         self._model = self.params.get("_model")
         self._best_mode = None
-        self._initialize_model()
+        # self._initialize_model()
 
     def _initialize_model(self):
         """Initialize the TSPulse model and pipeline."""
@@ -137,6 +137,7 @@ class TSPulseDetector(BaseDetector):
             is_anomaly=(anomaly_scores > self.params["threshold"]),
             expected_value=expected_value,
             expected_bounds=expected_bounds,
+            used_fallback=True,
         )
 
     def _detect_univariate(self, time_series: TimeSeriesWrapper) -> ModelResult:
@@ -185,7 +186,7 @@ class TSPulseDetector(BaseDetector):
             
             f_scores = []
 
-            val_size = min(len(data) // 2, 2048) 
+            val_size = min(len(data) // 2, 512) 
             val_data = data.iloc[:val_size]
             
             # If no labels are available in the input data, we can't do triangulation based on F1

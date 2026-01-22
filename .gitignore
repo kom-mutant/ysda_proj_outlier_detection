@@ -115,3 +115,6 @@ __MACOSX/
 
 # databases
 *.parquet
+
+# Comet API token
+.comet_token
