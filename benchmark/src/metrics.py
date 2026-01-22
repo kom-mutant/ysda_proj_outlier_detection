@@ -70,7 +70,13 @@ def get_f1_best(y_true, y_score):
     """
     y_true = np.asarray(y_true)
     y_score = np.asarray(y_score)
-    if sum(y_true) == 0:
+
+    # Handle NaNs in y_true or y_score
+    mask = ~np.isnan(y_true) & ~np.isnan(y_score)
+    y_true = y_true[mask]
+    y_score = y_score[mask]
+
+    if len(y_true) == 0 or sum(y_true) == 0:
         return 1.0, 100.0
     y_true_compressed, y_score_compressed = compress_point_adjusted(y_true, y_score)
     precision, recall, thresholds = precision_recall_curve(y_true_compressed, y_score_compressed)

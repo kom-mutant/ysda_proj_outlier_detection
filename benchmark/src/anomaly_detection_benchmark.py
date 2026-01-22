@@ -8,7 +8,6 @@ from typing import Any, Dict, Optional
 import numpy as np
 import pandas as pd
 from anomaly_detection import AnomalyDetectionSystem
-# from anomaly_detection import select_threshold
 from merlion.evaluate.anomaly import TSADMetric
 from merlion.utils import TimeSeries
 
@@ -64,7 +63,7 @@ class AnomalyDetectionBenchmark:
                 least_significant_scale=detector_configs["detection_model_params"].get("least_significant_scale", 0.01),
                 least_significant_score=detector_configs["detection_model_params"].get("least_significant_score", 0.1),
             )
-        if detector_configs["detection_model_params"]["model_name"] == "FlowState":
+        elif detector_configs["detection_model_params"]["model_name"] == "FlowState":
             model_path = "ibm-granite/granite-timeseries-flowstate-r1"
             detector_configs["detection_model_params"]["_model"] = FlowStateForPrediction.from_pretrained(
                 model_path
@@ -202,7 +201,7 @@ class AnomalyDetectionBenchmark:
             index=ground_truth_df.index,
         )
 
-        anomalies_percentage = anomalies["ground_truth"].sum() / len(anomalies) * 100
+        # anomalies_percentage = anomalies["ground_truth"].sum() / len(anomalies) * 100
         # threshold = select_threshold(anomalies_percentage, detector.detect(values_df), "knee", S=10.0)
 
         if all_at_once:
@@ -211,6 +210,7 @@ class AnomalyDetectionBenchmark:
             #     detection_result.is_anomaly = detection_result.anomaly_scores > threshold
             anomalies["predicted"] = detection_result.is_anomaly
             anomalies["score"] = detection_result.anomaly_scores
+            anomalies["used_fallback"] = detection_result.used_fallback
             return anomalies
 
         if values_df.index[-1] - values_df.index[0] < history_window:
@@ -233,6 +233,7 @@ class AnomalyDetectionBenchmark:
         anomalies = anomalies.iloc[-sum([len(i) for i in predictions_anomaly]) :]
         anomalies["predicted"] = np.concatenate(predictions_anomaly[::-1])
         anomalies["score"] = np.concatenate(predictions_score[::-1])
+        anomalies["used_fallback"] = False # Default for windowed
 
         return anomalies
 
@@ -243,6 +244,7 @@ class AnomalyDetectionBenchmark:
             anomalies["predicted"],
             anomalies["score"],
         )
+        used_fallback = anomalies["used_fallback"].iloc[0] if "used_fallback" in anomalies.columns else False
         ground_truth_ts = TimeSeries.from_pd(anomalies[["ground_truth"]].rename(columns={"ground_truth": "value"}))
         predicted_ts = TimeSeries.from_pd(anomalies[["predicted"]].rename(columns={"predicted": "value"}))
 
@@ -276,6 +278,7 @@ class AnomalyDetectionBenchmark:
             "f1_pointwise_pa_best": get_pointwise_f1_pa(ground_truth.values, predicted.values),
             "auc_pr": get_auc_pr(ground_truth, score),
             "best_threshold": threshold,
+            "used_fallback": used_fallback,
         }
 
     def get_stats(self, as_dict: bool = False) -> pd.DataFrame:

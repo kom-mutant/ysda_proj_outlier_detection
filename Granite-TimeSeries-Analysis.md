@@ -13,8 +13,10 @@ IBM Granite Time Series — семейство foundation models для обра
 
 - 1. [Карточка ts-pulse на HuggingFace](https://huggingface.co/ibm-granite/granite-timeseries-tspulse-r1)
 -- Здесь можно убедиться, что датасеты с нашего бенчмарка не участвовали в тренировке TSPulse.
-- 2. Пример использования TSPulse: [Zero-shot anomaly detection](github.com/ibm-granite/granite-tsfm/blob/main/notebooks/hfdemo/tspulse_anomaly_detection.ipynb)
+- 2. [Пример использования TSPulse для задачи zero-shot prediction](github.com/ibm-granite/granite-tsfm/blob/main/notebooks/hfdemo/tspulse_anomaly_detection.ipynb)
+-- Здесь важно взять реализацию Mode Prediction - выбор режима предсказания
 - 3. [Видеоролик с NeurIPS 2024 с презентацией семейства моделей](https://slideslive.com/39031413/granite-time-series-foundation-models)
+- 4. [Пример использования Mode](https://github.com/ibm-granite/granite-tsfm/blob/main/notebooks/hfdemo/flowstate_getting_started.ipynb)
 
 ## Примеры использования от ibm-granite-community
 
@@ -24,7 +26,6 @@ IBM Granite Time Series — семейство foundation models для обра
 В этом примере показывается применение TTM для forecasting-а по одному каналу. Показан пример, как в библиотеке можно заворачивать модели в pipeline.
 - 2. [Препроцессинг bike sharing dataset с экзогенными и категориальными фичами; файнтюнинг TTM ](https://github.com/ibm-granite-community/granite-timeseries-cookbook/blob/main/recipes/Time_Series/Bike_Sharing_Finetuning_with_Exogenous.ipynb)
 - 3. [fКак делать few-shot forecasting and fine-tuning с помощью TTM](https://github.com/ibm-granite-community/granite-timeseries-cookbook/blob/main/recipes/Retail_Forecasting/M5_retail_sales_forecasting.ipynb)
-- 4. [Как работать с моделькой при помощи собственной для IBM SDK (Watson AI SDK)](https://github.com/ibm-granite-community/granite-timeseries-cookbook/blob/main/recipes/Time_Series/Getting_Started_with_WatsonX_AI_SDK.ipynb)
 
 
 ## Характеристики и ограничения моделей.

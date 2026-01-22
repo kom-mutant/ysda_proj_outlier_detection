@@ -61,6 +61,7 @@ class ARDetector(BaseDetector):
             is_anomaly=(z_scores > self.params["threshold"]),
             expected_value=expected_value,
             expected_bounds=expected_bounds,
+            used_fallback=True,
         )
 
     def _detect_univariate(self, time_series: TimeSeriesWrapper) -> ModelResult:

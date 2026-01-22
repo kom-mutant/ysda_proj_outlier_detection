@@ -9,6 +9,7 @@ from ..models import (
     ARDetector,
     TSPulseDetector,
     FlowStateDetector,
+    TTMDetector,
     ModelResult
 )
 
@@ -33,7 +34,8 @@ class AnomalyDetectionSystem:
     AVAILABLE_MODELS = {
         "Autoregressive": ARDetector,
         "FlowState": FlowStateDetector,
-        "TSPulse": TSPulseDetector
+        "TSPulse": TSPulseDetector,
+        "TTM": TTMDetector
     }
 
     def __init__(
