@@ -8,7 +8,6 @@ from typing import Any, Dict, Optional
 import numpy as np
 import pandas as pd
 from anomaly_detection import AnomalyDetectionSystem
-# from anomaly_detection import select_threshold
 from merlion.evaluate.anomaly import TSADMetric
 from merlion.utils import TimeSeries
 
@@ -64,7 +63,7 @@ class AnomalyDetectionBenchmark:
                 least_significant_scale=detector_configs["detection_model_params"].get("least_significant_scale", 0.01),
                 least_significant_score=detector_configs["detection_model_params"].get("least_significant_score", 0.1),
             )
-        if detector_configs["detection_model_params"]["model_name"] == "FlowState":
+        elif detector_configs["detection_model_params"]["model_name"] == "FlowState":
             model_path = "ibm-granite/granite-timeseries-flowstate-r1"
             detector_configs["detection_model_params"]["_model"] = FlowStateForPrediction.from_pretrained(
                 model_path
@@ -202,7 +201,7 @@ class AnomalyDetectionBenchmark:
             index=ground_truth_df.index,
         )
 
-        anomalies_percentage = anomalies["ground_truth"].sum() / len(anomalies) * 100
+        # anomalies_percentage = anomalies["ground_truth"].sum() / len(anomalies) * 100
         # threshold = select_threshold(anomalies_percentage, detector.detect(values_df), "knee", S=10.0)
 
         if all_at_once:

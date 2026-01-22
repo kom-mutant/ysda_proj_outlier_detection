@@ -11,9 +11,24 @@
             "model_name": "Autoregressive"
         }
     },
+    "flowstate": {
+        "transforms_params": {
+            "apply_normalization": true,
+            "apply_moving_average": false,
+            "moving_average_n_steps": 1
+        },
+        "detection_model_params": {
+            "context_length": 512,
+            "prediction_length": 1,
+            "threshold": 3.0,
+            "scale_factor": 1.0,
+            "batch_size": 32,
+            "model_name": "FlowState"
+        }
+    },
     "tspulse": {
         "transforms_params": {
-            "apply_normalization": false,
+            "apply_normalization": true,
             "apply_moving_average": false,
             "moving_average_n_steps": 1
         },
@@ -28,19 +43,19 @@
             "model_name": "TSPulse"
         }
     },
-    "flowstate": {
+    "ttm": {
         "transforms_params": {
-            "apply_normalization": false,
+            "apply_normalization": true,
             "apply_moving_average": false,
             "moving_average_n_steps": 1
         },
         "detection_model_params": {
             "context_length": 512,
-            "prediction_length": 1,
+            "prediction_length": 96,
             "threshold": 3.0,
-            "scale_factor": 1.0,
+            "use_prob": true,
             "batch_size": 32,
-            "model_name": "FlowState"
+            "model_name": "TTM"
         }
     },
 }
