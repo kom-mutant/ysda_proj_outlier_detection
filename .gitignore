@@ -117,4 +117,4 @@ __MACOSX/
 *.parquet
 
 # Comet API token
-.comet_token
+# .comet_token

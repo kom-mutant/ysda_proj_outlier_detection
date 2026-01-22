@@ -186,7 +186,7 @@ class TSPulseDetector(BaseDetector):
             
             f_scores = []
 
-            val_size = min(len(data) // 2, 512) 
+            val_size = min(len(data) // 2, 256) 
             val_data = data.iloc[:val_size]
             
             # If no labels are available in the input data, we can't do triangulation based on F1
