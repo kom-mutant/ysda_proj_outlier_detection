@@ -83,8 +83,11 @@ class CometLogger(BaseLogger):
                 value=anomalies['value'],
                 labeling_gt=anomalies['ground_truth'].astype('int32'),
                 labeling_predicted=labeling_predicted,
-                title=f"{series_name} (F1: {metrics.get('f1', 0):.4f})",
-                save_path=plot_path
+                title=f"{series_name} (F1-best: {metrics['f1_best']:.4f})",
+                save_path=plot_path,
+                scores=anomalies["score"],
+                threshold=metrics["best_threshold"],
+                save_path=f"./results/{series_name}_anomaly_plot.png"
             )
             
             self.experiment.log_image(plot_path, name=f"{series_name}_plot")

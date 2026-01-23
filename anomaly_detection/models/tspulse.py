@@ -160,64 +160,62 @@ class TSPulseDetector(BaseDetector):
             data["value"] = data["value"].interpolate(method="linear").ffill().bfill()
         
         if self._best_mode is None:
+            # Modes to choose from as per instructions
+            base_modes = [
+                AnomalyScoreMethods.PREDICTIVE.value,
+                AnomalyScoreMethods.TIME_RECONSTRUCTION.value,
+                AnomalyScoreMethods.FREQUENCY_RECONSTRUCTION.value,
+            ]
             
+            # Possible sublists to test for triangulation
             prediction_modes = [
-                [AnomalyScoreMethods.PREDICTIVE.value],
-                [AnomalyScoreMethods.TIME_RECONSTRUCTION.value],
-                [AnomalyScoreMethods.FREQUENCY_RECONSTRUCTION.value],
-                [
-                    AnomalyScoreMethods.PREDICTIVE.value,
-                    AnomalyScoreMethods.TIME_RECONSTRUCTION.value,
-                ],
-                [
-                    AnomalyScoreMethods.TIME_RECONSTRUCTION.value,
-                    AnomalyScoreMethods.FREQUENCY_RECONSTRUCTION.value
-                ],
-                [
-                    AnomalyScoreMethods.PREDICTIVE.value,
-                    AnomalyScoreMethods.FREQUENCY_RECONSTRUCTION.value
-                ],
-                [
-                    AnomalyScoreMethods.PREDICTIVE.value,
-                    AnomalyScoreMethods.TIME_RECONSTRUCTION.value,
-                    AnomalyScoreMethods.FREQUENCY_RECONSTRUCTION.value
-                ]
+                [base_modes[0]],
+                [base_modes[1]],
+                [base_modes[2]],
+                [base_modes[0], base_modes[1]],
+                [base_modes[0], base_modes[2]],
+                [base_modes[1], base_modes[2]],
+                base_modes # All three
             ]
             
             f_scores = []
 
-            val_size = min(len(data) // 2, 256) 
+            # Use a portion for validation
+            val_size = min(len(data) // 2, 1024) 
             val_data = data.iloc[:val_size]
             
-            # If no labels are available in the input data, we can't do triangulation based on F1
-            # We'll default to the combined mode if 'y' column is missing or all same
+            # Use 'is_anomaly' for ground truth as per task description
+            y_true_col = "is_anomaly" if "is_anomaly" in val_data.columns else "y"
 
-            # We only work with labeled data
-            for mode in prediction_modes:
-                try:
-                    pipeline = self._create_pipeline(mode)
-                    result = pipeline(
-                        val_data,
-                        batch_size=self.params["batch_size"],
-                        predictive_score_smoothing=True
-                    )
-                    scores = result["anomaly_score"].values
-                    # Handle potential NaNs in scores
-                    scores = np.nan_to_num(scores, nan=0.0)
-                    
-                    y_pred = (scores > self.params["threshold"]).astype(int)
-                    y_true = val_data["is_anomaly"].values
-                    
-                    # Handle NaNs in y_true for f1_score
-                    mask = ~np.isnan(y_true)
-                    if np.sum(mask) > 0:
-                        f_score = f1_score(y_true[mask], y_pred[mask], average="binary")
-                    else:
-                        f_score = 0.0
+            # If no labels are available, default to all modes
+            if y_true_col not in val_data.columns or len(np.unique(val_data[y_true_col].dropna())) < 2:
+                self._best_mode = base_modes
+            else:
+                for mode in prediction_modes:
+                    try:
+                        pipeline = self._create_pipeline(mode)
+                        result = pipeline(
+                            val_data,
+                            batch_size=self.params["batch_size"],
+                            predictive_score_smoothing=True
+                        )
+                        scores = result["anomaly_score"].values
+                        # Handle potential NaNs in scores
+                        scores = np.nan_to_num(scores, nan=0.0)
                         
-                    f_scores.append(f_score)
-                except Exception:
-                    f_scores.append(-1.0)
+                        y_pred = (scores > self.params["threshold"]).astype(int)
+                        y_true = val_data["is_anomaly"].values
+                        
+                        # Handle NaNs in y_true for f1_score
+                        mask = ~np.isnan(y_true)
+                        if np.sum(mask) > 0:
+                            f_score = f1_score(y_true[mask], y_pred[mask], average="binary")
+                        else:
+                            f_score = 0.0
+                            
+                        f_scores.append(f_score)
+                    except Exception:
+                        f_scores.append(-1.0)
             
             self._best_mode = prediction_modes[np.argmax(f_scores)]
 

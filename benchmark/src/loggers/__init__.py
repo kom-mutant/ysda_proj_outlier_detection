@@ -4,4 +4,4 @@ from .inline_logger import InlineLogger
 from .comet_logger import CometLogger
 # from .underdeep_logger import UnderdeepLogger
 
-__all__ = [BaseLogger, InlineLogger, CometLogger]
+__all__ = ["BaseLogger", "InlineLogger", "CometLogger"]

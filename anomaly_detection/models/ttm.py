@@ -29,9 +29,10 @@ class TTMDetector(BaseDetector):
         self._model.eval()
 
     def get_default_params(self) -> Dict[str, Any]:
+         # TTM-r2 default parametres
         return {
             "context_length": 512,
-            "prediction_length": 96, # TTM-r2 default
+            "prediction_length": 96,
             "threshold": 3.0,
             "use_probabilistic": True,
             "confidence_level": 0.95,
@@ -48,7 +49,6 @@ class TTMDetector(BaseDetector):
 
     def _check_insufficient_samples(self, time_series: TimeSeriesWrapper) -> bool:
         n_samples = time_series.time_series_pd.shape[0]
-        # TTM-r2 usually expects context_length (e.g. 512)
         return n_samples < self.params["context_length"]
 
     def _get_fallback_result_univariate(self, time_series: TimeSeriesWrapper) -> ModelResult:

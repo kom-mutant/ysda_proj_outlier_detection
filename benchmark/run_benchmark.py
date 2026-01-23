@@ -10,7 +10,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from src.anomaly_detection_benchmark import AnomalyDetectionBenchmark
 from src.dataset import Dataset
-from src.loggers import InlineLogger
+from src.loggers import InlineLogger, CometLogger
 # from src.loggers import UnderdeepLogger, MLflowLogger
 
 from termcolor import colored
@@ -93,7 +93,7 @@ def main():
         '--logger',
         type=str,
         default='inline',
-        choices=['inline', 'underdeep', 'mlflow'],  # you have inline only. Actually, try implementing WandB logger
+        choices=['inline', 'underdeep', 'mlflow', 'comet'],  # you have inline only. Actually, try implementing WandB logger
         help='Logger to use (default: inline)',
     )
     parser.add_argument('--windowed', dest='all_at_once', action='store_false', help='Process series in windows')
@@ -133,6 +133,12 @@ def main():
         for config_name, configuration in configurations.items():
             if args.logger == 'inline':
                 logger = InlineLogger(backend=None)
+            elif args.logger == 'comet':
+                logger = CometLogger(
+                    project_name="anomaly-detection-benchmark",
+                    experiment_name=f"{dataset_name}-{config_name}",
+                    **configuration
+                )
             # elif args.logger == 'mlflow':
             #     logger = MLflowLogger(
             #         experiment_name=dataset_name.lower().replace('/', '-'),
